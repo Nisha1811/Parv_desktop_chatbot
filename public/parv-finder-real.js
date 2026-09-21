@@ -4,33 +4,65 @@
   var botName='Parv Industries';
   if(document.getElementById('parv-finder-root')) return;
 
-  var SID_KEY='parv_sid_desktop_v6_brand';
+  var SID_KEY='parv_sid_v7_final';
   var SESSION_ID=localStorage.getItem(SID_KEY);
   if(!SESSION_ID){ SESSION_ID='parv_desktop_'+Date.now(); localStorage.setItem(SID_KEY, SESSION_ID); }
+
+  var RECENT_KEY='parv_recent_v7';
+  var defaultRecents=[
+    {title:'Spices Bulk Search', sub:'25kg packs, 1000kg MOQ', q:'Spices List'},
+    {title:'Coconut Water Export', sub:'200ml x 48 pieces inquiry', q:'Coconut Water'},
+    {title:'Noodles Distributor', sub:'45g x 96, ₹500 carton', q:'Noodles'}
+  ];
 
   var css=document.createElement('style');
   css.textContent=`
     @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600&display=swap');
     #parv-finder-root{position:fixed;inset:0;z-index:9999999;background:#FFFEFB;font-family:'Outfit',sans-serif;display:flex;overflow:hidden}
     #parv-finder-root *{box-sizing:border-box;font-family:'Outfit',sans-serif}
-    .pf-sidebar{width:280px;background:#FFFEFB;border-right:1px solid rgba(0,0,0,.07);display:flex;flex-direction:column;flex-shrink:0;transition:all .35s cubic-bezier(.16,1,.3,1)}
+    .pf-sidebar{width:280px;background:#FFFEFB;border-right:1px solid rgba(0,0,0,.07);display:flex;flex-direction:column;flex-shrink:0;transition:all .35s cubic-bezier(.16,1,.3,1);position:relative}
     .pf-sidebar.collapsed{width:0;border-right:none;transform:translateX(-100%);opacity:0;overflow:hidden}
     .pf-side-top{padding:18px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.07);background:#FFFEFB}
     .pf-logo{font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:#8B1E1E;letter-spacing:.02em}
-    .pf-logo span{font-weight:400;font-size:12px;color:#6B7280;display:block;letter-spacing:.08em;margin-top:1px}
+    .pf-logo span{font-weight:400;font-size:11px;color:#6B7280;display:block;letter-spacing:.08em;margin-top:1px}
     .pf-toggle{width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,.08);background:#F6F3EE;display:grid;place-items:center;cursor:pointer;color:#8B1E1E}
-    .pf-new-btn{margin:16px;background:#8B1E1E;color:#FFFEFB;border:none;border-radius:100px;padding:12px 16px;font-weight:600;font-size:13px;cursor:pointer;letter-spacing:.02em;box-shadow:0 4px 14px rgba(139,30,30,.25);transition:.2s}
-    .pf-new-btn:hover{background:#6E1717;transform:translateY(-1px)}
-    .pf-recent-label{font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.1em;padding:16px 16px 8px}
-    .pf-recent-item{margin:4px 12px;padding:10px 12px;border-radius:12px;cursor:pointer;border:1px solid transparent;transition:.2s}
+    .pf-new-btn{margin:16px;background:#8B1E1E;color:#FFFEFB;border:none;border-radius:100px;padding:12px 16px;font-weight:600;font-size:13px;cursor:pointer;letter-spacing:.02em;box-shadow:0 4px 14px rgba(139,30,30,.25)}
+    .pf-recent-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
+    .pf-recent-label{font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.1em}
+    .pf-clear-btn{font-size:11px;font-weight:600;color:#8B1E1E;background:transparent;border:none;cursor:pointer;padding:4px 6px;border-radius:6px}
+    .pf-clear-btn:hover{background:#F6F3EE}
+    .pf-recent-list{flex:1;overflow:auto;padding-bottom:8px}
+    .pf-recent-item{margin:4px 12px;padding:10px 12px;border-radius:12px;cursor:pointer;border:1px solid transparent;position:relative;transition:.2s;group}
     .pf-recent-item.active{background:#F6F3EE;border-color:rgba(139,30,30,.12)}
-    .pf-recent-item:hover{background:#FDFBF7}
+    .pf-recent-item:hover{background:#FDFBF7;border-color:rgba(0,0,0,.06)}
+    .pf-recent-item.archived{opacity:.5;background:#f9fafb}
+    .pf-recent-main{padding-right:36px}
     .pf-recent-title{font-size:13px;font-weight:600;color:#1F1F1F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .pf-recent-sub{font-size:11px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .pf-side-bottom{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(0,0,0,.07);display:flex;align-items:center;gap:10px;background:#FFFEFB}
-    .pf-avatar{width:32px;height:32px;border-radius:50%;background:#8B1E1E;color:#FFFEFB;display:grid;place-items:center;font-weight:600;font-size:12px;font-family:'Fraunces',serif}
+    .pf-recent-actions{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:none;gap:4px}
+    .pf-recent-item:hover .pf-recent-actions{display:flex}
+    .pf-action-btn{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.08);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:11px;transition:.15s}
+    .pf-action-btn:hover{background:#1F1F1F;color:#fff;border-color:#1F1F1F}
+    .pf-action-btn.del:hover{background:#DC2626;border-color:#DC2626}
+    /* User menu - like PropertyFinder screenshot */
+    .pf-side-bottom{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(0,0,0,.07);display:flex;align-items:center;gap:10px;background:#FFFEFB;cursor:pointer;position:relative;user-select:none}
+    .pf-side-bottom:hover{background:#F6F3EE}
+    .pf-avatar{width:32px;height:32px;border-radius:50%;background:#8B1E1E;color:#FFFEFB;display:grid;place-items:center;font-weight:600;font-size:12px;font-family:'Fraunces',serif;flex-shrink:0}
+    .pf-user-info{flex:1;min-width:0}
+    .pf-user-name{font-size:13px;font-weight:600;color:#1F1F1F}
+    .pf-user-plan{font-size:11px;color:#6B7280}
+    .pf-user-chevron{font-size:12px;color:#9CA3AF;transition:.2s}
+    .pf-side-bottom.open .pf-user-chevron{transform:rotate(180deg)}
+    .pf-user-menu{position:absolute;bottom:100%;left:12px;right:12px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);overflow:hidden;display:none;z-index:100;margin-bottom:8px}
+    .pf-user-menu.open{display:block}
+    .pf-menu-item{padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1F1F1F;cursor:pointer;transition:.15s}
+    .pf-menu-item:hover{background:#F6F3EE}
+    .pf-menu-item .ico{width:20px;display:grid;place-items:center;color:#6B7280}
+    .pf-menu-divider{height:1px;background:rgba(0,0,0,.06);margin:0}
+    .pf-menu-email{padding:12px 14px;font-size:13px;color:#1F1F1F;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;background:#FFFEFB}
+    /* Main */
     .pf-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#FFFEFB;position:relative}
-    .pf-main::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.4;background-image:linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px);background-size:28px 28px}
+    .pf-main::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.35;background-image:linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px);background-size:28px 28px}
     .pf-topbar{height:64px;background:rgba(255,254,251,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,.07);display:flex;align-items:center;gap:12px;padding:0 20px;flex-shrink:0;position:relative;z-index:2}
     .pf-topbar-logo{font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:#8B1E1E;letter-spacing:.02em}
     .pf-topbar-sub{font-size:11px;color:#6B7280;letter-spacing:.04em;margin-top:-2px}
@@ -43,55 +75,68 @@
     .pf-sub{margin-top:16px;font-size:15px;color:#6B7280;text-align:center;max-width:520px;line-height:1.6}
     .pf-search-wrap{width:100%;max-width:680px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:100px;padding:6px 6px 6px 20px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,.06);transition:.25s;position:relative;z-index:1}
     .pf-search-wrap:focus-within{border-color:#8B1E1E;box-shadow:0 0 0 4px rgba(139,30,30,.1),0 8px 32px rgba(0,0,0,.06)}
-    .pf-icon-btn{width:36px;height:36px;border-radius:50%;background:#F6F3EE;border:1px solid rgba(0,0,0,.06);display:grid;place-items:center;cursor:pointer;color:#6B7280;flex-shrink:0;transition:.2s}
-    .pf-icon-btn:hover{background:#fff}
+    .pf-icon-btn{width:36px;height:36px;border-radius:50%;background:#F6F3EE;border:1px solid rgba(0,0,0,.06);display:grid;place-items:center;cursor:pointer;color:#6B7280;flex-shrink:0}
     .pf-input{flex:1;border:none;outline:none;font-size:14px;color:#1F1F1F;background:transparent}
-    .pf-input::placeholder{color:#9CA3AF}
-    .pf-send{background:#8B1E1E;width:44px;height:44px;border-radius:50%;border:none;color:#FFFEFB;display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 4px 12px rgba(139,30,30,.25);transition:.2s}
-    .pf-send:hover{background:#6E1717;transform:scale(1.04)}
+    .pf-send{background:#8B1E1E;width:44px;height:44px;border-radius:50%;border:none;color:#FFFEFB;display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 4px 12px rgba(139,30,30,.25)}
     .pf-chips-grid{margin-top:28px;width:100%;max-width:680px;display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;z-index:1}
     .pf-chip-card{border-radius:16px;padding:16px 18px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid rgba(0,0,0,.06);text-align:left;line-height:1.4;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:.25s}
-    .pf-chip-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08);border-color:rgba(139,30,30,.15)}
-    .pf-chip-pink{background:#FFFEFB}.pf-chip-blue{background:#FDFBF7}.pf-chip-yellow{background:#FFFEFB}.pf-chip-red{background:#F6F3EE}
+    .pf-chip-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08)}
     .pf-chat-area{width:100%;max-width:760px;margin-top:24px;display:flex;flex-direction:column;gap:16px;padding-bottom:24px;display:none;position:relative;z-index:1}
     .pf-msg{padding:12px 16px;border-radius:20px;font-size:14px;line-height:1.6;max-width:82%;white-space:pre-wrap;word-wrap:break-word}
-    .pf-msg.user{background:#1F1F1F;color:#FFFEFB;align-self:flex-end;border-bottom-right-radius:6px;margin-left:auto;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+    .pf-msg.user{background:#1F1F1F;color:#FFFEFB;align-self:flex-end;border-bottom-right-radius:6px;margin-left:auto}
     .pf-msg.bot{background:#fff;border:1px solid rgba(0,0,0,.07);color:#1F1F1F;align-self:flex-start;border-bottom-left-radius:6px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-right:auto}
-    .pf-typing{display:flex;gap:4px;padding:14px 18px;background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:20px;border-bottom-left-radius:6px;width:fit-content;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .pf-typing{display:flex;gap:4px;padding:14px 18px;background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:20px;border-bottom-left-radius:6px;width:fit-content}
     .pf-dot{width:6px;height:6px;background:#8B1E1E;border-radius:50%;animation:pf-b 1.2s infinite}
     .pf-dot:nth-child(2){animation-delay:.15s}.pf-dot:nth-child(3){animation-delay:.3s}
     @keyframes pf-b{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-5px);opacity:1}}
     .pf-bottom-bar{padding:18px 24px;background:rgba(255,254,251,.92);backdrop-filter:blur(14px);border-top:1px solid rgba(0,0,0,.07);display:flex;justify-content:center;flex-shrink:0;position:relative;z-index:2}
-    .pf-wa{position:fixed;right:20px;bottom:90px;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;border:1px solid rgba(255,255,255,.2);display:grid;place-items:center;box-shadow:0 8px 24px rgba(37,211,102,.35);cursor:pointer;font-weight:700;z-index:5}
+    .pf-wa{position:fixed;right:20px;bottom:90px;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;border:none;display:grid;place-items:center;box-shadow:0 8px 24px rgba(37,211,102,.35);cursor:pointer;z-index:5;transition:.2s}
+    .pf-wa:hover{transform:scale(1.06);box-shadow:0 12px 32px rgba(37,211,102,.45)}
+    .pf-wa svg{width:28px;height:28px;fill:#fff}
     .pf-cta-row{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
-    .pf-cta-primary{background:#8B1E1E;color:#FFFEFB;border:1px solid #8B1E1E;padding:12px 22px;border-radius:100px;font-size:13px;font-weight:600;letter-spacing:.02em;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.2s}
-    .pf-cta-primary:hover{background:#6E1717;transform:translateY(-1px)}
-    .pf-cta-secondary{background:#fff;color:#1F1F1F;border:1px solid rgba(0,0,0,.12);padding:12px 22px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.2s}
-    .pf-cta-secondary:hover{background:#F6F3EE}
+    .pf-cta-primary{background:#8B1E1E;color:#FFFEFB;border:1px solid #8B1E1E;padding:12px 22px;border-radius:100px;font-size:13px;font-weight:600;letter-spacing:.02em;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+    .pf-cta-secondary{background:#fff;color:#1F1F1F;border:1px solid rgba(0,0,0,.12);padding:12px 22px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
     @media(max-width:900px){.pf-sidebar{position:absolute;z-index:20;height:100%;box-shadow:8px 0 32px rgba(0,0,0,.12)}.pf-sidebar.collapsed{width:280px;transform:translateX(-100%);opacity:1}.pf-heading{font-size:34px}}
   `;
   document.head.appendChild(css);
+
+  function loadRecents(){
+    try{ var saved=JSON.parse(localStorage.getItem(RECENT_KEY)); if(Array.isArray(saved)&&saved.length) return saved; }catch(e){}
+    return defaultRecents;
+  }
+  function saveRecents(list){ localStorage.setItem(RECENT_KEY, JSON.stringify(list)); }
+
+  var recents=loadRecents();
 
   var root=document.createElement('div'); root.id='parv-finder-root';
   root.innerHTML=`
     <div class="pf-sidebar" id="pfSidebar">
       <div class="pf-side-top"><div class="pf-logo">PARV<span>INDUSTRIES</span></div><button class="pf-toggle" id="pfCloseSidebar">‹</button></div>
       <button class="pf-new-btn" id="pfNewBtn">+ New Search</button>
-      <div class="pf-recent-label">RECENT SEARCHES</div>
-      <div id="pfRecentList" style="flex:1;overflow:auto">
-        <div class="pf-recent-item active" data-q="Spices List"><div class="pf-recent-title">Spices Bulk Search</div><div class="pf-recent-sub">25kg packs, 1000kg MOQ</div></div>
-        <div class="pf-recent-item" data-q="Coconut Water"><div class="pf-recent-title">Coconut Water Export</div><div class="pf-recent-sub">200ml x 48 pieces inquiry</div></div>
-        <div class="pf-recent-item" data-q="Noodles"><div class="pf-recent-title">Noodles Distributor</div><div class="pf-recent-sub">45g x 96, ₹500 carton</div></div>
+      <div class="pf-recent-header"><div class="pf-recent-label">RECENT SEARCHES</div><button class="pf-clear-btn" id="pfClearBtn">Clear</button></div>
+      <div class="pf-recent-list" id="pfRecentList"></div>
+      <div class="pf-side-bottom" id="pfUserBtn">
+        <div class="pf-avatar">U</div>
+        <div class="pf-user-info"><div class="pf-user-name">User</div><div class="pf-user-plan">Free</div></div>
+        <div class="pf-user-chevron">∧</div>
+        <div class="pf-user-menu" id="pfUserMenu">
+          <div class="pf-menu-email"><span class="ico">👤</span> user@example.com</div>
+          <div class="pf-menu-item" data-action="upgrade"><span class="ico">✨</span> Upgrade plan</div>
+          <div class="pf-menu-divider"></div>
+          <div class="pf-menu-item" data-action="settings"><span class="ico">⚙️</span> Settings</div>
+          <div class="pf-menu-item" data-action="help"><span class="ico">❓</span> Help</div>
+          <div class="pf-menu-divider"></div>
+          <div class="pf-menu-item" data-action="logout"><span class="ico">⎋</span> Log out</div>
+        </div>
       </div>
-      <div class="pf-side-bottom"><div class="pf-avatar">P</div><div><div style="font-size:13px;font-weight:600">User</div><div style="font-size:11px;color:#6B7280">Free</div></div></div>
     </div>
     <div class="pf-main">
       <div class="pf-topbar">
         <button class="pf-hamburger hidden" id="pfOpenSidebar">☰</button>
         <div style="display:flex;flex-direction:column"><div class="pf-topbar-logo">PARV INDUSTRIES</div><div class="pf-topbar-sub">A subsidiary of Chakshu Food Pvt. Ltd.</div></div>
         <div style="flex:1"></div>
-        <button style="background:#8B1E1E;color:#FFFEFB;border:none;border-radius:100px;padding:10px 18px;font-size:12px;font-weight:600;letter-spacing:.02em;display:flex;align-items:center;gap:6px;cursor:pointer" onclick="window.open('https://www.parvindustries.in','_blank')">REQUEST A QUOTE ↗</button>
-        <button style="width:36px;height:36px;border-radius:50%;background:#F6F3EE;border:1px solid rgba(0,0,0,.08);display:grid;place-items:center;cursor:pointer" id="pfCloseRoot">✕</button>
+        <a href="https://www.parvindustries.in" target="_blank" class="pf-cta-primary" style="text-decoration:none">REQUEST A QUOTE ↗</a>
+        <button style="width:36px;height:36px;border-radius:50%;background:#F6F3EE;border:1px solid rgba(0,0,0,.08);display:grid;place-items:center;cursor:pointer;margin-left:8px" id="pfCloseRoot">✕</button>
       </div>
       <div class="pf-center" id="pfCenter">
         <div id="pfHero" style="width:100%;display:flex;flex-direction:column;align-items:center">
@@ -99,15 +144,15 @@
           <div class="pf-heading">Good food<br>begins with<br><em>good intent.</em></div>
           <div class="pf-sub">Parv Industries makes and supplies spices, coconut water, noodles, and bulk ingredients for the businesses that keep India moving.</div>
           <div class="pf-cta-row">
-            <button class="pf-cta-primary" onclick="document.getElementById('pfInput').focus()">EXPLORE PRODUCTS ↗</button>
-            <button class="pf-cta-secondary" data-q="Bulk Quote">REQUEST BULK QUOTE ↗</button>
+            <a href="https://www.parvindustries.in#products" target="_blank" class="pf-cta-primary">EXPLORE PRODUCTS ↗</a>
+            <a href="https://www.parvindustries.in#contact" target="_blank" class="pf-cta-secondary">REQUEST BULK QUOTE ↗</a>
           </div>
           <div style="height:28px"></div>
           <div class="pf-chips-grid" id="pfChipsGrid">
-            <button class="pf-chip-card pf-chip-pink" data-q="Spices List">🌶 Spices List — 25kg Pack, 1000kg MOQ</button>
-            <button class="pf-chip-card pf-chip-blue" data-q="Coconut Water">🥥 Pure Coconut Water 200ml x 48</button>
-            <button class="pf-chip-card pf-chip-yellow" data-q="Noodles">🍜 Eurofresh Noodles 45g x 96 - ₹500</button>
-            <button class="pf-chip-card pf-chip-red" data-q="Bulk Quote">📦 Bulk Quote for Export Order</button>
+            <button class="pf-chip-card" data-q="Spices List">🌶 Spices List — 25kg Pack, 1000kg MOQ</button>
+            <button class="pf-chip-card" data-q="Coconut Water">🥥 Pure Coconut Water 200ml x 48</button>
+            <button class="pf-chip-card" data-q="Noodles">🍜 Eurofresh Noodles 45g x 96 - ₹500</button>
+            <button class="pf-chip-card" data-q="Bulk Quote">📦 Bulk Quote for Export Order</button>
           </div>
         </div>
         <div class="pf-chat-area" id="pfChatArea"></div>
@@ -121,7 +166,9 @@
           <button class="pf-send" id="pfSendBtn">➤</button>
         </div>
       </div>
-      <button class="pf-wa" onclick="window.open('https://wa.me/919899634294','_blank')">W</button>
+      <button class="pf-wa" id="pfWaBtn" title="Chat on WhatsApp">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.11 4.64A9.86 9.86 0 0 0 12.04 2C6.24 2 1.5 6.73 1.5 12.53c0 1.86.49 3.67 1.42 5.27L1.5 22.5l4.82-1.26a9.8 9.8 0 0 0 4.68 1.19h.01c5.8 0 10.53-4.73 10.53-10.53 0-2.81-1.09-5.46-3.09-7.45l.46-.81zM12.05 20.33a8.05 8.05 0 0 1-4.1-1.12l-.29-.17-2.86.75.76-2.79-.19-.29a8.02 8.02 0 0 1-1.24-4.18c0-4.44 3.61-8.05 8.05-8.05 2.15 0 4.17.84 5.69 2.36a8 8 0 0 1 2.36 5.69c0 4.44-3.61 8.05-8.04 8.05zm4.41-5.98c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.19-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.02-.37.1-.49.1-.1.24-.26.36-.39.12-.13.16-.22.24-.37.08-.14.04-.27-.02-.39-.06-.12-.54-1.3-.74-1.78-.2-.47-.39-.41-.54-.42h-.46c-.16 0-.42.06-.64.27-.22.22-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.57.18 1.09.16 1.5.1.46-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z"/></svg>
+      </button>
     </div>
   `;
   document.body.appendChild(root);
@@ -129,10 +176,10 @@
   var sidebar=document.getElementById('pfSidebar');
   var openBtn=document.getElementById('pfOpenSidebar');
   var closeBtn=document.getElementById('pfCloseSidebar');
-  function setSidebar(open){ if(open){ sidebar.classList.remove('collapsed'); openBtn.classList.add('hidden'); localStorage.setItem('parv_sidebar_v6','open'); } else { sidebar.classList.add('collapsed'); openBtn.classList.remove('hidden'); localStorage.setItem('parv_sidebar_v6','closed'); } }
+  function setSidebar(open){ if(open){ sidebar.classList.remove('collapsed'); openBtn.classList.add('hidden'); localStorage.setItem('parv_sidebar_v7','open'); } else { sidebar.classList.add('collapsed'); openBtn.classList.remove('hidden'); localStorage.setItem('parv_sidebar_v7','closed'); } }
   closeBtn.onclick=function(){ setSidebar(false); };
   openBtn.onclick=function(){ setSidebar(true); };
-  if(localStorage.getItem('parv_sidebar_v6')==='closed') setSidebar(false);
+  if(localStorage.getItem('parv_sidebar_v7')==='closed') setSidebar(false);
 
   var input=document.getElementById('pfInput');
   var sendBtn=document.getElementById('pfSendBtn');
@@ -141,6 +188,19 @@
   var recentList=document.getElementById('pfRecentList');
   var center=document.getElementById('pfCenter');
 
+  function renderRecents(){
+    recentList.innerHTML='';
+    recents.forEach(function(item, idx){
+      var div=document.createElement('div');
+      div.className='pf-recent-item'+(idx===0?' active':'')+(item.archived?' archived':'');
+      div.dataset.q=item.q;
+      div.dataset.idx=idx;
+      div.innerHTML='<div class="pf-recent-main"><div class="pf-recent-title">'+item.title+'</div><div class="pf-recent-sub">'+item.sub+'</div></div><div class="pf-recent-actions"><button class="pf-action-btn archive" title="Archive">📦</button><button class="pf-action-btn del" title="Delete">🗑</button></div>';
+      recentList.appendChild(div);
+    });
+  }
+  renderRecents();
+
   function newSearch(){
     hero.style.display='flex'; chatArea.style.display='none'; chatArea.innerHTML=''; input.value=''; input.focus();
     document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')});
@@ -148,9 +208,58 @@
   }
   document.getElementById('pfNewBtn').onclick=newSearch;
   document.getElementById('pfCloseRoot').onclick=function(){ root.remove(); css.remove(); };
-  recentList.onclick=function(e){ var item=e.target.closest('.pf-recent-item'); if(!item) return; document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')}); item.classList.add('active'); doSearch(item.dataset.q); };
+  document.getElementById('pfClearBtn').onclick=function(){
+    if(confirm('Clear all recent searches?')){ recents=[]; saveRecents(recents); renderRecents(); }
+  };
+
+  recentList.onclick=function(e){
+    var del=e.target.closest('.pf-action-btn.del');
+    var arch=e.target.closest('.pf-action-btn.archive');
+    var item=e.target.closest('.pf-recent-item');
+    if(!item) return;
+    var idx=parseInt(item.dataset.idx);
+    if(del){
+      e.stopPropagation();
+      recents.splice(idx,1); saveRecents(recents); renderRecents();
+      return;
+    }
+    if(arch){
+      e.stopPropagation();
+      recents[idx].archived=!recents[idx].archived; saveRecents(recents); renderRecents();
+      return;
+    }
+    document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')});
+    item.classList.add('active'); doSearch(item.dataset.q);
+  };
+
+  // User menu like PropertyFinder screenshot
+  var userBtn=document.getElementById('pfUserBtn');
+  var userMenu=document.getElementById('pfUserMenu');
+  userBtn.onclick=function(e){
+    if(e.target.closest('.pf-action-btn')) return;
+    userBtn.classList.toggle('open');
+    userMenu.classList.toggle('open');
+  };
+  document.addEventListener('click', function(e){
+    if(!userBtn.contains(e.target)){ userBtn.classList.remove('open'); userMenu.classList.remove('open'); }
+  });
+  userMenu.onclick=function(e){
+    var it=e.target.closest('.pf-menu-item');
+    if(!it) return;
+    var act=it.dataset.action;
+    if(act==='logout'){ if(confirm('Log out?')){ localStorage.clear(); location.reload(); } }
+    if(act==='settings'){ alert('Settings — Coming soon'); }
+    if(act==='help'){ window.open('https://www.parvindustries.in','_blank'); }
+    if(act==='upgrade'){ window.open('https://www.parvindustries.in#contact','_blank'); }
+    userMenu.classList.remove('open'); userBtn.classList.remove('open');
+  };
+
+  // WhatsApp icon - real WhatsApp link
+  document.getElementById('pfWaBtn').onclick=function(){
+    window.open('https://wa.me/919896342940?text=Hi%20Parv%20Industries%20I%20want%20to%20inquire%20about%20bulk%20order','_blank');
+  };
+
   document.getElementById('pfChipsGrid').onclick=function(e){ var b=e.target.closest('button'); if(!b) return; doSearch(b.dataset.q); };
-  document.querySelector('.pf-cta-secondary').onclick=function(){ doSearch('Bulk Quote'); };
 
   function doSearch(text){
     if(!text.trim()) return;
@@ -171,8 +280,11 @@
       }catch(e){}
       if(!reply || reply.trim()==='' || reply==='{}' || reply==='[]'){ reply='Thanks for reaching out! Our team will get back to you shortly.'; }
       typing.remove();
-      var bot=document.createElement('div'); bot.className='pf-msg bot'; bot.innerHTML=reply.replace(/\n/g,'<br>'); chatArea.appendChild(bot);
-      var newItem=document.createElement('div'); newItem.className='pf-recent-item'; newItem.dataset.q=text; newItem.innerHTML='<div class="pf-recent-title">'+text.slice(0,24)+'</div><div class="pf-recent-sub">'+reply.slice(0,38).replace(/<[^>]*>/g,'')+'...</div>'; recentList.prepend(newItem);
+      var bot=document.createElement('div'); bot.className='pf-msg bot'; bot.innerHTML=reply.replace(/\\n/g,'<br>').replace(/\\n/g,'<br>'); chatArea.appendChild(bot);
+      // add to recents
+      recents.unshift({title:text.slice(0,22), sub:reply.slice(0,38).replace(/<[^>]*>/g,'')+'...', q:text});
+      if(recents.length>20) recents=recents.slice(0,20);
+      saveRecents(recents); renderRecents();
       center.scrollTop=center.scrollHeight; input.focus();
     }).catch(function(err){
       typing.remove();
