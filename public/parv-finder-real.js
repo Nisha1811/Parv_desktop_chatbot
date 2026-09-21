@@ -4,15 +4,15 @@
   var botName='Parv Industries';
   if(document.getElementById('parv-finder-root')) return;
 
-  var SID_KEY='parv_sid_v7_final';
+  var SID_KEY='parv_sid_v8_fixed';
   var SESSION_ID=localStorage.getItem(SID_KEY);
   if(!SESSION_ID){ SESSION_ID='parv_desktop_'+Date.now(); localStorage.setItem(SID_KEY, SESSION_ID); }
 
-  var RECENT_KEY='parv_recent_v7';
+  var RECENT_KEY='parv_recent_v8';
   var defaultRecents=[
-    {title:'Spices Bulk Search', sub:'25kg packs, 1000kg MOQ', q:'Spices List'},
-    {title:'Coconut Water Export', sub:'200ml x 48 pieces inquiry', q:'Coconut Water'},
-    {title:'Noodles Distributor', sub:'45g x 96, ₹500 carton', q:'Noodles'}
+    {title:'Spices List', sub:'25kg packs, 1000kg MOQ', q:'Spices List', archived:false},
+    {title:'Coconut Water', sub:'200ml x 48 pieces inquiry', q:'Coconut Water', archived:false},
+    {title:'Noodles', sub:'45g x 96, ₹500 carton', q:'Noodles', archived:false}
   ];
 
   var css=document.createElement('style');
@@ -26,27 +26,25 @@
     .pf-logo{font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:#8B1E1E;letter-spacing:.02em}
     .pf-logo span{font-weight:400;font-size:11px;color:#6B7280;display:block;letter-spacing:.08em;margin-top:1px}
     .pf-toggle{width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,.08);background:#F6F3EE;display:grid;place-items:center;cursor:pointer;color:#8B1E1E}
-    .pf-new-btn{margin:16px;background:#8B1E1E;color:#FFFEFB;border:none;border-radius:100px;padding:12px 16px;font-weight:600;font-size:13px;cursor:pointer;letter-spacing:.02em;box-shadow:0 4px 14px rgba(139,30,30,.25)}
+    .pf-new-btn{margin:16px;background:#8B1E1E;color:#FFFEFB;border:none;border-radius:100px;padding:12px 16px;font-weight:600;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(139,30,30,.25)}
     .pf-recent-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
     .pf-recent-label{font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.1em}
-    .pf-clear-btn{font-size:11px;font-weight:600;color:#8B1E1E;background:transparent;border:none;cursor:pointer;padding:4px 6px;border-radius:6px}
+    .pf-clear-btn{font-size:11px;font-weight:600;color:#8B1E1E;background:transparent;border:none;cursor:pointer;padding:4px 8px;border-radius:6px;transition:.15s}
     .pf-clear-btn:hover{background:#F6F3EE}
     .pf-recent-list{flex:1;overflow:auto;padding-bottom:8px}
-    .pf-recent-item{margin:4px 12px;padding:10px 12px;border-radius:12px;cursor:pointer;border:1px solid transparent;position:relative;transition:.2s;group}
+    .pf-recent-item{margin:4px 12px;padding:10px 12px;border-radius:12px;cursor:pointer;border:1px solid transparent;position:relative;transition:.2s;display:flex;align-items:center;justify-content:space-between;gap:8px}
     .pf-recent-item.active{background:#F6F3EE;border-color:rgba(139,30,30,.12)}
     .pf-recent-item:hover{background:#FDFBF7;border-color:rgba(0,0,0,.06)}
-    .pf-recent-item.archived{opacity:.5;background:#f9fafb}
-    .pf-recent-main{padding-right:36px}
+    .pf-recent-item.archived{opacity:.5}
+    .pf-recent-main{flex:1;min-width:0}
     .pf-recent-title{font-size:13px;font-weight:600;color:#1F1F1F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .pf-recent-sub{font-size:11px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .pf-recent-actions{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:none;gap:4px}
-    .pf-recent-item:hover .pf-recent-actions{display:flex}
-    .pf-action-btn{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.08);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:11px;transition:.15s}
-    .pf-action-btn:hover{background:#1F1F1F;color:#fff;border-color:#1F1F1F}
-    .pf-action-btn.del:hover{background:#DC2626;border-color:#DC2626}
-    /* User menu - like PropertyFinder screenshot */
+    .pf-recent-actions{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:.2s}
+    .pf-recent-item:hover .pf-recent-actions{opacity:1}
+    .pf-action-btn{width:24px;height:24px;border-radius:6px;border:1px solid rgba(0,0,0,.08);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:12px;transition:.15s}
+    .pf-action-btn:hover{background:#1F1F1F;color:#fff}
+    .pf-action-btn.del:hover{background:#DC2626;border-color:#DC2626;color:#fff}
     .pf-side-bottom{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(0,0,0,.07);display:flex;align-items:center;gap:10px;background:#FFFEFB;cursor:pointer;position:relative;user-select:none}
-    .pf-side-bottom:hover{background:#F6F3EE}
     .pf-avatar{width:32px;height:32px;border-radius:50%;background:#8B1E1E;color:#FFFEFB;display:grid;place-items:center;font-weight:600;font-size:12px;font-family:'Fraunces',serif;flex-shrink:0}
     .pf-user-info{flex:1;min-width:0}
     .pf-user-name{font-size:13px;font-weight:600;color:#1F1F1F}
@@ -60,10 +58,9 @@
     .pf-menu-item .ico{width:20px;display:grid;place-items:center;color:#6B7280}
     .pf-menu-divider{height:1px;background:rgba(0,0,0,.06);margin:0}
     .pf-menu-email{padding:12px 14px;font-size:13px;color:#1F1F1F;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;background:#FFFEFB}
-    /* Main */
     .pf-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#FFFEFB;position:relative}
     .pf-main::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.35;background-image:linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px);background-size:28px 28px}
-    .pf-topbar{height:64px;background:rgba(255,254,251,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,.07);display:flex;align-items:center;gap:12px;padding:0 20px;flex-shrink:0;position:relative;z-index:2}
+    .pf-topbar{height:64px;background:rgba(255,254,251,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,.07);display:flex;align-items:center;gap:12px;padding:0 20px;flex-shrink:0;position:relative;z-index:2}
     .pf-topbar-logo{font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:#8B1E1E;letter-spacing:.02em}
     .pf-topbar-sub{font-size:11px;color:#6B7280;letter-spacing:.04em;margin-top:-2px}
     .pf-hamburger{width:36px;height:36px;border-radius:10px;border:1px solid rgba(0,0,0,.08);background:#F6F3EE;display:grid;place-items:center;cursor:pointer;color:#1F1F1F}
@@ -76,7 +73,7 @@
     .pf-search-wrap{width:100%;max-width:680px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:100px;padding:6px 6px 6px 20px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,.06);transition:.25s;position:relative;z-index:1}
     .pf-search-wrap:focus-within{border-color:#8B1E1E;box-shadow:0 0 0 4px rgba(139,30,30,.1),0 8px 32px rgba(0,0,0,.06)}
     .pf-icon-btn{width:36px;height:36px;border-radius:50%;background:#F6F3EE;border:1px solid rgba(0,0,0,.06);display:grid;place-items:center;cursor:pointer;color:#6B7280;flex-shrink:0}
-    .pf-input{flex:1;border:none;outline:none;font-size:14px;color:#1F1F1F;background:transparent}
+    .pf-input{flex:1;border:none;outline:none;font-size:14px;color:#1F1F1F;background:transparent;min-width:0}
     .pf-send{background:#8B1E1E;width:44px;height:44px;border-radius:50%;border:none;color:#FFFEFB;display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 4px 12px rgba(139,30,30,.25)}
     .pf-chips-grid{margin-top:28px;width:100%;max-width:680px;display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;z-index:1}
     .pf-chip-card{border-radius:16px;padding:16px 18px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid rgba(0,0,0,.06);text-align:left;line-height:1.4;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:.25s}
@@ -89,23 +86,22 @@
     .pf-dot{width:6px;height:6px;background:#8B1E1E;border-radius:50%;animation:pf-b 1.2s infinite}
     .pf-dot:nth-child(2){animation-delay:.15s}.pf-dot:nth-child(3){animation-delay:.3s}
     @keyframes pf-b{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-5px);opacity:1}}
-    .pf-bottom-bar{padding:18px 24px;background:rgba(255,254,251,.92);backdrop-filter:blur(14px);border-top:1px solid rgba(0,0,0,.07);display:flex;justify-content:center;flex-shrink:0;position:relative;z-index:2}
-    .pf-wa{position:fixed;right:20px;bottom:90px;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;border:none;display:grid;place-items:center;box-shadow:0 8px 24px rgba(37,211,102,.35);cursor:pointer;z-index:5;transition:.2s}
-    .pf-wa:hover{transform:scale(1.06);box-shadow:0 12px 32px rgba(37,211,102,.45)}
+    /* FIXED SEARCH BAR ALIGNMENT - CENTERED */
+    .pf-bottom-bar{padding:16px 20px;background:rgba(255,254,251,.96);backdrop-filter:blur(14px);border-top:1px solid rgba(0,0,0,.07);display:flex;justify-content:center;align-items:center;flex-shrink:0;position:relative;z-index:2;width:100%}
+    .pf-bottom-inner{width:100%;max-width:760px;display:flex;justify-content:center;align-items:center;margin:0 auto}
+    .pf-bottom-inner .pf-search-wrap{width:100%;max-width:680px;margin:0 auto}
+    .pf-wa{position:fixed;right:20px;bottom:96px;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;border:none;display:grid;place-items:center;box-shadow:0 8px 24px rgba(37,211,102,.35);cursor:pointer;z-index:5;transition:.2s}
+    .pf-wa:hover{transform:scale(1.06)}
     .pf-wa svg{width:28px;height:28px;fill:#fff}
     .pf-cta-row{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
-    .pf-cta-primary{background:#8B1E1E;color:#FFFEFB;border:1px solid #8B1E1E;padding:12px 22px;border-radius:100px;font-size:13px;font-weight:600;letter-spacing:.02em;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+    .pf-cta-primary{background:#8B1E1E;color:#FFFEFB;border:1px solid #8B1E1E;padding:12px 22px;border-radius:100px;font-size:13px;font-weight:600;letter-spacing:.02em;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
     .pf-cta-secondary{background:#fff;color:#1F1F1F;border:1px solid rgba(0,0,0,.12);padding:12px 22px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
-    @media(max-width:900px){.pf-sidebar{position:absolute;z-index:20;height:100%;box-shadow:8px 0 32px rgba(0,0,0,.12)}.pf-sidebar.collapsed{width:280px;transform:translateX(-100%);opacity:1}.pf-heading{font-size:34px}}
+    @media(max-width:900px){.pf-sidebar{position:absolute;z-index:20;height:100%;box-shadow:8px 0 32px rgba(0,0,0,.12)}.pf-sidebar.collapsed{width:280px;transform:translateX(-100%);opacity:1}.pf-heading{font-size:34px}.pf-bottom-bar{padding:12px 12px}.pf-bottom-inner .pf-search-wrap{max-width:100%}}
   `;
   document.head.appendChild(css);
 
-  function loadRecents(){
-    try{ var saved=JSON.parse(localStorage.getItem(RECENT_KEY)); if(Array.isArray(saved)&&saved.length) return saved; }catch(e){}
-    return defaultRecents;
-  }
-  function saveRecents(list){ localStorage.setItem(RECENT_KEY, JSON.stringify(list)); }
-
+  function loadRecents(){ try{ var s=JSON.parse(localStorage.getItem(RECENT_KEY)); if(Array.isArray(s)&&s.length) return s; }catch(e){} return JSON.parse(JSON.stringify(defaultRecents)); }
+  function saveRecents(l){ localStorage.setItem(RECENT_KEY, JSON.stringify(l)); }
   var recents=loadRecents();
 
   var root=document.createElement('div'); root.id='parv-finder-root';
@@ -135,7 +131,7 @@
         <button class="pf-hamburger hidden" id="pfOpenSidebar">☰</button>
         <div style="display:flex;flex-direction:column"><div class="pf-topbar-logo">PARV INDUSTRIES</div><div class="pf-topbar-sub">A subsidiary of Chakshu Food Pvt. Ltd.</div></div>
         <div style="flex:1"></div>
-        <a href="https://www.parvindustries.in" target="_blank" class="pf-cta-primary" style="text-decoration:none">REQUEST A QUOTE ↗</a>
+        <a href="https://www.parvindustries.in" target="_blank" style="background:#8B1E1E;color:#FFFEFB;border:none;border-radius:100px;padding:10px 18px;font-size:12px;font-weight:600;letter-spacing:.02em;display:flex;align-items:center;gap:6px;cursor:pointer;text-decoration:none">REQUEST A QUOTE ↗</a>
         <button style="width:36px;height:36px;border-radius:50%;background:#F6F3EE;border:1px solid rgba(0,0,0,.08);display:grid;place-items:center;cursor:pointer;margin-left:8px" id="pfCloseRoot">✕</button>
       </div>
       <div class="pf-center" id="pfCenter">
@@ -144,8 +140,8 @@
           <div class="pf-heading">Good food<br>begins with<br><em>good intent.</em></div>
           <div class="pf-sub">Parv Industries makes and supplies spices, coconut water, noodles, and bulk ingredients for the businesses that keep India moving.</div>
           <div class="pf-cta-row">
-            <a href="https://www.parvindustries.in#products" target="_blank" class="pf-cta-primary">EXPLORE PRODUCTS ↗</a>
-            <a href="https://www.parvindustries.in#contact" target="_blank" class="pf-cta-secondary">REQUEST BULK QUOTE ↗</a>
+            <button class="pf-cta-primary" id="pfExploreBtn">EXPLORE PRODUCTS ↗</button>
+            <button class="pf-cta-secondary" id="pfBulkBtn">REQUEST BULK QUOTE ↗</button>
           </div>
           <div style="height:28px"></div>
           <div class="pf-chips-grid" id="pfChipsGrid">
@@ -158,12 +154,14 @@
         <div class="pf-chat-area" id="pfChatArea"></div>
       </div>
       <div class="pf-bottom-bar">
-        <div class="pf-search-wrap">
-          <button class="pf-icon-btn">📎</button>
-          <button class="pf-icon-btn">⚙</button>
-          <input class="pf-input" id="pfInput" placeholder="Ask about spices, bulk orders..." autocomplete="off"/>
-          <button class="pf-icon-btn">🎤</button>
-          <button class="pf-send" id="pfSendBtn">➤</button>
+        <div class="pf-bottom-inner">
+          <div class="pf-search-wrap">
+            <button class="pf-icon-btn" title="Attach">📎</button>
+            <button class="pf-icon-btn" title="Settings">⚙</button>
+            <input class="pf-input" id="pfInput" placeholder="Ask about spices, bulk orders..." autocomplete="off"/>
+            <button class="pf-icon-btn" title="Mic">🎤</button>
+            <button class="pf-send" id="pfSendBtn">➤</button>
+          </div>
         </div>
       </div>
       <button class="pf-wa" id="pfWaBtn" title="Chat on WhatsApp">
@@ -176,10 +174,10 @@
   var sidebar=document.getElementById('pfSidebar');
   var openBtn=document.getElementById('pfOpenSidebar');
   var closeBtn=document.getElementById('pfCloseSidebar');
-  function setSidebar(open){ if(open){ sidebar.classList.remove('collapsed'); openBtn.classList.add('hidden'); localStorage.setItem('parv_sidebar_v7','open'); } else { sidebar.classList.add('collapsed'); openBtn.classList.remove('hidden'); localStorage.setItem('parv_sidebar_v7','closed'); } }
+  function setSidebar(open){ if(open){ sidebar.classList.remove('collapsed'); openBtn.classList.add('hidden'); localStorage.setItem('parv_sidebar_v8','open'); } else { sidebar.classList.add('collapsed'); openBtn.classList.remove('hidden'); localStorage.setItem('parv_sidebar_v8','closed'); } }
   closeBtn.onclick=function(){ setSidebar(false); };
   openBtn.onclick=function(){ setSidebar(true); };
-  if(localStorage.getItem('parv_sidebar_v7')==='closed') setSidebar(false);
+  if(localStorage.getItem('parv_sidebar_v8')==='closed') setSidebar(false);
 
   var input=document.getElementById('pfInput');
   var sendBtn=document.getElementById('pfSendBtn');
@@ -190,26 +188,26 @@
 
   function renderRecents(){
     recentList.innerHTML='';
+    if(recents.length===0){
+      var empty=document.createElement('div'); empty.style.cssText='padding:12px 16px;color:#9CA3AF;font-size:12px;text-align:center'; empty.textContent='No recent searches'; recentList.appendChild(empty); return;
+    }
     recents.forEach(function(item, idx){
       var div=document.createElement('div');
       div.className='pf-recent-item'+(idx===0?' active':'')+(item.archived?' archived':'');
-      div.dataset.q=item.q;
-      div.dataset.idx=idx;
-      div.innerHTML='<div class="pf-recent-main"><div class="pf-recent-title">'+item.title+'</div><div class="pf-recent-sub">'+item.sub+'</div></div><div class="pf-recent-actions"><button class="pf-action-btn archive" title="Archive">📦</button><button class="pf-action-btn del" title="Delete">🗑</button></div>';
+      div.dataset.q=item.q; div.dataset.idx=idx;
+      div.innerHTML='<div class="pf-recent-main"><div class="pf-recent-title">'+item.title+'</div><div class="pf-recent-sub">'+item.sub+'</div></div><div class="pf-recent-actions"><button class="pf-action-btn archive" title="Archive chat">📦</button><button class="pf-action-btn del" title="Delete chat">🗑️</button></div>';
       recentList.appendChild(div);
     });
   }
   renderRecents();
 
-  function newSearch(){
-    hero.style.display='flex'; chatArea.style.display='none'; chatArea.innerHTML=''; input.value=''; input.focus();
-    document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')});
-    SESSION_ID='parv_desktop_'+Date.now(); localStorage.setItem(SID_KEY, SESSION_ID);
-  }
+  function newSearch(){ hero.style.display='flex'; chatArea.style.display='none'; chatArea.innerHTML=''; input.value=''; input.focus(); document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')}); SESSION_ID='parv_desktop_'+Date.now(); localStorage.setItem(SID_KEY, SESSION_ID); }
   document.getElementById('pfNewBtn').onclick=newSearch;
   document.getElementById('pfCloseRoot').onclick=function(){ root.remove(); css.remove(); };
+  
+  // FIXED: Clear without popup, instantly clear
   document.getElementById('pfClearBtn').onclick=function(){
-    if(confirm('Clear all recent searches?')){ recents=[]; saveRecents(recents); renderRecents(); }
+    recents=[]; saveRecents(recents); renderRecents();
   };
 
   recentList.onclick=function(e){
@@ -218,47 +216,30 @@
     var item=e.target.closest('.pf-recent-item');
     if(!item) return;
     var idx=parseInt(item.dataset.idx);
-    if(del){
-      e.stopPropagation();
-      recents.splice(idx,1); saveRecents(recents); renderRecents();
-      return;
-    }
-    if(arch){
-      e.stopPropagation();
-      recents[idx].archived=!recents[idx].archived; saveRecents(recents); renderRecents();
-      return;
-    }
-    document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')});
-    item.classList.add('active'); doSearch(item.dataset.q);
+    if(del){ e.stopPropagation(); recents.splice(idx,1); saveRecents(recents); renderRecents(); return; }
+    if(arch){ e.stopPropagation(); recents[idx].archived=!recents[idx].archived; saveRecents(recents); renderRecents(); return; }
+    document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')}); item.classList.add('active'); doSearch(item.dataset.q);
   };
 
-  // User menu like PropertyFinder screenshot
   var userBtn=document.getElementById('pfUserBtn');
   var userMenu=document.getElementById('pfUserMenu');
-  userBtn.onclick=function(e){
-    if(e.target.closest('.pf-action-btn')) return;
-    userBtn.classList.toggle('open');
-    userMenu.classList.toggle('open');
-  };
-  document.addEventListener('click', function(e){
-    if(!userBtn.contains(e.target)){ userBtn.classList.remove('open'); userMenu.classList.remove('open'); }
-  });
+  userBtn.onclick=function(e){ if(e.target.closest('.pf-action-btn')) return; userBtn.classList.toggle('open'); userMenu.classList.toggle('open'); };
+  document.addEventListener('click', function(e){ if(!userBtn.contains(e.target)){ userBtn.classList.remove('open'); userMenu.classList.remove('open'); } });
   userMenu.onclick=function(e){
-    var it=e.target.closest('.pf-menu-item');
-    if(!it) return;
+    var it=e.target.closest('.pf-menu-item'); if(!it) return;
     var act=it.dataset.action;
-    if(act==='logout'){ if(confirm('Log out?')){ localStorage.clear(); location.reload(); } }
-    if(act==='settings'){ alert('Settings — Coming soon'); }
-    if(act==='help'){ window.open('https://www.parvindustries.in','_blank'); }
-    if(act==='upgrade'){ window.open('https://www.parvindustries.in#contact','_blank'); }
+    if(act==='logout'){ localStorage.clear(); location.reload(); }
+    if(act==='settings'){ doSearch('Settings'); }
+    if(act==='help'){ doSearch('Help'); }
+    if(act==='upgrade'){ doSearch('Upgrade plan'); }
     userMenu.classList.remove('open'); userBtn.classList.remove('open');
   };
 
-  // WhatsApp icon - real WhatsApp link
-  document.getElementById('pfWaBtn').onclick=function(){
-    window.open('https://wa.me/919896342940?text=Hi%20Parv%20Industries%20I%20want%20to%20inquire%20about%20bulk%20order','_blank');
-  };
+  document.getElementById('pfWaBtn').onclick=function(){ window.open('https://wa.me/919896342940?text=Hi%20Parv%20Industries%20I%20want%20to%20inquire%20about%20bulk%20order','_blank'); };
 
+  // FIXED: Explore and Bulk Quote - NO external links, just trigger chat (normal)
+  document.getElementById('pfExploreBtn').onclick=function(){ doSearch('Spices List'); };
+  document.getElementById('pfBulkBtn').onclick=function(){ doSearch('Bulk Quote'); };
   document.getElementById('pfChipsGrid').onclick=function(e){ var b=e.target.closest('button'); if(!b) return; doSearch(b.dataset.q); };
 
   function doSearch(text){
@@ -269,27 +250,18 @@
     input.value='';
     var typing=document.createElement('div'); typing.className='pf-typing'; typing.innerHTML='<div class="pf-dot"></div><div class="pf-dot"></div><div class="pf-dot"></div>'; chatArea.appendChild(typing);
     center.scrollTop=center.scrollHeight;
-
     var payload = { chatInput: text, message: text, text: text, sessionId: SESSION_ID, botName: botName };
     fetch(HOOK, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
     .then(function(r){ return r.text(); }).then(function(reply){
-      try{
-        var d=JSON.parse(reply);
-        if(Array.isArray(d) && d[0]){ reply = d[0].output || d[0].text || d[0].message || d[0].response || reply; }
-        else { reply = d.output || d.text || d.message || d.response || d.reply || reply; }
-      }catch(e){}
+      try{ var d=JSON.parse(reply); if(Array.isArray(d) && d[0]){ reply = d[0].output || d[0].text || d[0].message || d[0].response || reply; } else { reply = d.output || d.text || d.message || d.response || d.reply || reply; } }catch(e){}
       if(!reply || reply.trim()==='' || reply==='{}' || reply==='[]'){ reply='Thanks for reaching out! Our team will get back to you shortly.'; }
       typing.remove();
       var bot=document.createElement('div'); bot.className='pf-msg bot'; bot.innerHTML=reply.replace(/\\n/g,'<br>').replace(/\\n/g,'<br>'); chatArea.appendChild(bot);
-      // add to recents
-      recents.unshift({title:text.slice(0,22), sub:reply.slice(0,38).replace(/<[^>]*>/g,'')+'...', q:text});
+      recents.unshift({title:text.slice(0,22), sub:reply.slice(0,38).replace(/<[^>]*>/g,'')+'...', q:text, archived:false});
       if(recents.length>20) recents=recents.slice(0,20);
       saveRecents(recents); renderRecents();
       center.scrollTop=center.scrollHeight; input.focus();
-    }).catch(function(err){
-      typing.remove();
-      var errDiv=document.createElement('div'); errDiv.className='pf-msg bot'; errDiv.textContent='Cannot reach server: '+err.message; chatArea.appendChild(errDiv);
-    });
+    }).catch(function(err){ typing.remove(); var errDiv=document.createElement('div'); errDiv.className='pf-msg bot'; errDiv.textContent='Cannot reach server: '+err.message; chatArea.appendChild(errDiv); });
   }
 
   sendBtn.onclick=function(){ doSearch(input.value); };
