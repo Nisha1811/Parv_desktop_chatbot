@@ -4,23 +4,28 @@
   var botName='Parv Industries';
   if(document.getElementById('parv-finder-root')) return;
 
+  // PERSISTENT session - CRITICAL FIX
+  var SID_KEY='parv_sid_desktop_v5';
+  var SESSION_ID=localStorage.getItem(SID_KEY);
+  if(!SESSION_ID){ SESSION_ID='parv_desktop_'+Date.now(); localStorage.setItem(SID_KEY, SESSION_ID); }
+
   var css=document.createElement('style');
   css.textContent=`
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     #parv-finder-root{position:fixed;inset:0;z-index:9999999;background:#fcfcff;font-family:Inter,sans-serif;display:flex;overflow:hidden}
     #parv-finder-root *{box-sizing:border-box;font-family:Inter,sans-serif}
-    .pf-sidebar{width:280px;background:#fff;border-right:1px solid #e8e8ef;display:flex;flex-direction:column;flex-shrink:0;transition:all .3s cubic-bezier(.4,0,.2,1)}
+    .pf-sidebar{width:280px;background:#fff;border-right:1px solid #e8e8ef;display:flex;flex-direction:column;flex-shrink:0;transition:all .3s}
     .pf-sidebar.collapsed{width:0;border-right:none;transform:translateX(-100%);opacity:0;overflow:hidden}
     .pf-side-top{padding:18px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f0f5}
     .pf-logo{font-weight:700;font-size:16px;color:#4f46e5}
     .pf-toggle{width:32px;height:32px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;display:grid;place-items:center;cursor:pointer}
-    .pf-new-btn{margin:16px;background:#4f46e5;color:#fff;border:none;border-radius:12px;padding:12px 16px;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(79,70,229,.3)}
+    .pf-new-btn{margin:16px;background:#4f46e5;color:#fff;border:none;border-radius:12px;padding:12px 16px;font-weight:600;font-size:14px;cursor:pointer}
     .pf-recent-label{font-size:11px;font-weight:600;color:#9ca3af;letter-spacing:.08em;padding:16px 16px 8px}
     .pf-recent-item{margin:4px 12px;padding:10px 12px;border-radius:10px;cursor:pointer;border:1px solid transparent}
     .pf-recent-item.active{background:#eef2ff;border-color:#c7d2fe}
     .pf-recent-item:hover{background:#f5f3ff}
-    .pf-recent-title{font-size:13px;font-weight:600;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .pf-recent-sub{font-size:11px;color:#6b7280;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pf-recent-title{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pf-recent-sub{font-size:11px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .pf-side-bottom{margin-top:auto;padding:12px 16px;border-top:1px solid #f0f0f5;display:flex;align-items:center;gap:10px}
     .pf-avatar{width:32px;height:32px;border-radius:50%;background:#4f46e5;color:#fff;display:grid;place-items:center;font-weight:600;font-size:12px}
     .pf-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(1200px 600px at 50% -10%, #eef2ff 0%, #fcfcff 50%, #fff 100%)}
@@ -59,9 +64,9 @@
       <button class="pf-new-btn" id="pfNewBtn">+ New Search</button>
       <div class="pf-recent-label">RECENT SEARCHES</div>
       <div id="pfRecentList" style="flex:1;overflow:auto">
-        <div class="pf-recent-item active" data-q="Spices Bulk Search"><div class="pf-recent-title">Spices Bulk Search</div><div class="pf-recent-sub">Looking for 25kg packs, 1000kg MOQ</div></div>
-        <div class="pf-recent-item" data-q="Coconut Water Export"><div class="pf-recent-title">Coconut Water Export</div><div class="pf-recent-sub">200ml x 48 pieces inquiry</div></div>
-        <div class="pf-recent-item" data-q="Noodles Distributor"><div class="pf-recent-title">Noodles Distributor</div><div class="pf-recent-sub">45g x 96, ₹500 carton</div></div>
+        <div class="pf-recent-item active" data-q="Spices List"><div class="pf-recent-title">Spices List</div><div class="pf-recent-sub">Looking for 25kg packs, 1000kg MOQ</div></div>
+        <div class="pf-recent-item" data-q="Coconut Water"><div class="pf-recent-title">Coconut Water Export</div><div class="pf-recent-sub">200ml x 48 pieces inquiry</div></div>
+        <div class="pf-recent-item" data-q="Noodles"><div class="pf-recent-title">Noodles Distributor</div><div class="pf-recent-sub">45g x 96, ₹500 carton</div></div>
       </div>
       <div class="pf-side-bottom"><div class="pf-avatar">U</div><div><div style="font-size:13px;font-weight:600">User</div><div style="font-size:11px;color:#6b7280">Free</div></div></div>
     </div>
@@ -114,7 +119,14 @@
   var recentList=document.getElementById('pfRecentList');
   var center=document.getElementById('pfCenter');
 
-  function newSearch(){ hero.style.display='flex'; chatArea.style.display='none'; chatArea.innerHTML=''; input.value=''; input.focus(); document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')}); }
+  function newSearch(){
+    hero.style.display='flex'; chatArea.style.display='none'; chatArea.innerHTML=''; input.value=''; input.focus();
+    document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')});
+    // NEW SEARCH = new session (like old chatbot does)
+    SESSION_ID='parv_desktop_'+Date.now();
+    localStorage.setItem(SID_KEY, SESSION_ID);
+    console.log('New session:', SESSION_ID);
+  }
   document.getElementById('pfNewBtn').onclick=newSearch;
   document.getElementById('pfCloseRoot').onclick=function(){ root.remove(); css.remove(); };
   recentList.onclick=function(e){ var item=e.target.closest('.pf-recent-item'); if(!item) return; document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')}); item.classList.add('active'); doSearch(item.dataset.q); };
@@ -129,20 +141,21 @@
     var typing=document.createElement('div'); typing.className='pf-typing'; typing.innerHTML='<div class="pf-dot"></div><div class="pf-dot"></div><div class="pf-dot"></div>'; chatArea.appendChild(typing);
     center.scrollTop=center.scrollHeight;
 
-    // EXACT SAME PAYLOAD AS OLD BUBBLE CHATBOT (spices-chatbot-final-beautiful.js line 48)
     var payload = {
       chatInput: text,
       message: text,
       text: text,
-      sessionId: 'parv_' + Date.now(),
+      sessionId: SESSION_ID,
       botName: botName
     };
+    console.log('Sending to n8n:', payload);
 
     fetch(HOOK, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
     }).then(function(r){ return r.text(); }).then(function(reply){
+      console.log('n8n raw reply:', reply);
       try{
         var d=JSON.parse(reply);
         if(Array.isArray(d) && d[0]){ reply = d[0].output || d[0].text || d[0].message || d[0].response || reply; }
@@ -155,7 +168,7 @@
       center.scrollTop=center.scrollHeight; input.focus();
     }).catch(function(err){
       typing.remove();
-      var errDiv=document.createElement('div'); errDiv.className='pf-msg bot'; errDiv.textContent='Cannot reach server. Make sure n8n workflow is ACTIVE.'; chatArea.appendChild(errDiv);
+      var errDiv=document.createElement('div'); errDiv.className='pf-msg bot'; errDiv.textContent='Cannot reach server: '+err.message+'. Make sure n8n workflow is ACTIVE.'; chatArea.appendChild(errDiv);
     });
   }
 
