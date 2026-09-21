@@ -4,14 +4,14 @@
   var botName='Parv Industries';
   if(document.getElementById('parv-finder-root')) return;
 
-  var SID_KEY='parv_sid_v8_fixed';
+  var SID_KEY='parv_sid_v10_centered';
   var SESSION_ID=localStorage.getItem(SID_KEY);
   if(!SESSION_ID){ SESSION_ID='parv_desktop_'+Date.now(); localStorage.setItem(SID_KEY, SESSION_ID); }
 
-  var RECENT_KEY='parv_recent_v8';
+  var RECENT_KEY='parv_recent_v10';
   var defaultRecents=[
     {title:'Spices List', sub:'25kg packs, 1000kg MOQ', q:'Spices List', archived:false},
-    {title:'Coconut Water', sub:'200ml x 48 pieces inquiry', q:'Coconut Water', archived:false},
+    {title:'Coconut Water', sub:'200ml x 48 pieces', q:'Coconut Water', archived:false},
     {title:'Noodles', sub:'45g x 96, ₹500 carton', q:'Noodles', archived:false}
   ];
 
@@ -20,40 +20,38 @@
     @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600&display=swap');
     #parv-finder-root{position:fixed;inset:0;z-index:9999999;background:#FFFEFB;font-family:'Outfit',sans-serif;display:flex;overflow:hidden}
     #parv-finder-root *{box-sizing:border-box;font-family:'Outfit',sans-serif}
-    .pf-sidebar{width:280px;background:#FFFEFB;border-right:1px solid rgba(0,0,0,.07);display:flex;flex-direction:column;flex-shrink:0;transition:all .35s cubic-bezier(.16,1,.3,1);position:relative}
+    .pf-sidebar{width:280px;background:#FFFEFB;border-right:1px solid rgba(0,0,0,.07);display:flex;flex-direction:column;flex-shrink:0;transition:all .35s cubic-bezier(.16,1,.3,1)}
     .pf-sidebar.collapsed{width:0;border-right:none;transform:translateX(-100%);opacity:0;overflow:hidden}
-    .pf-side-top{padding:18px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.07);background:#FFFEFB}
-    .pf-logo{font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:#8B1E1E;letter-spacing:.02em}
-    .pf-logo span{font-weight:400;font-size:11px;color:#6B7280;display:block;letter-spacing:.08em;margin-top:1px}
+    .pf-side-top{padding:18px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.07)}
+    .pf-logo{font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:#8B1E1E}
+    .pf-logo span{font-weight:400;font-size:11px;color:#6B7280;display:block}
     .pf-toggle{width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,.08);background:#F6F3EE;display:grid;place-items:center;cursor:pointer;color:#8B1E1E}
-    .pf-new-btn{margin:16px;background:#8B1E1E;color:#FFFEFB;border:none;border-radius:100px;padding:12px 16px;font-weight:600;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(139,30,30,.25)}
+    .pf-new-btn{margin:16px;background:#8B1E1E;color:#FFFEFB;border:none;border-radius:100px;padding:12px 16px;font-weight:600;font-size:13px;cursor:pointer}
     .pf-recent-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
     .pf-recent-label{font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.1em}
-    .pf-clear-btn{font-size:11px;font-weight:600;color:#8B1E1E;background:transparent;border:none;cursor:pointer;padding:4px 8px;border-radius:6px;transition:.15s}
+    .pf-clear-btn{font-size:11px;font-weight:600;color:#8B1E1E;background:transparent;border:none;cursor:pointer;padding:4px 8px;border-radius:6px}
     .pf-clear-btn:hover{background:#F6F3EE}
     .pf-recent-list{flex:1;overflow:auto;padding-bottom:8px}
-    .pf-recent-item{margin:4px 12px;padding:10px 12px;border-radius:12px;cursor:pointer;border:1px solid transparent;position:relative;transition:.2s;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .pf-recent-item{margin:6px 12px;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;cursor:pointer}
     .pf-recent-item.active{background:#F6F3EE;border-color:rgba(139,30,30,.12)}
-    .pf-recent-item:hover{background:#FDFBF7;border-color:rgba(0,0,0,.06)}
-    .pf-recent-item.archived{opacity:.5}
+    .pf-recent-item.archived{opacity:.6;background:#f3f4f6;border-style:dashed}
     .pf-recent-main{flex:1;min-width:0}
     .pf-recent-title{font-size:13px;font-weight:600;color:#1F1F1F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .pf-recent-sub{font-size:11px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .pf-recent-actions{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:.2s}
-    .pf-recent-item:hover .pf-recent-actions{opacity:1}
-    .pf-action-btn{width:24px;height:24px;border-radius:6px;border:1px solid rgba(0,0,0,.08);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:12px;transition:.15s}
+    .pf-recent-actions{display:flex;gap:6px;flex-shrink:0}
+    .pf-action-btn{width:28px;height:28px;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:#FFFEFB;display:grid;place-items:center;cursor:pointer;font-size:14px;transition:.15s}
     .pf-action-btn:hover{background:#1F1F1F;color:#fff}
     .pf-action-btn.del:hover{background:#DC2626;border-color:#DC2626;color:#fff}
-    .pf-side-bottom{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(0,0,0,.07);display:flex;align-items:center;gap:10px;background:#FFFEFB;cursor:pointer;position:relative;user-select:none}
+    .pf-side-bottom{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(0,0,0,.07);display:flex;align-items:center;gap:10px;background:#FFFEFB;cursor:pointer;position:relative}
     .pf-avatar{width:32px;height:32px;border-radius:50%;background:#8B1E1E;color:#FFFEFB;display:grid;place-items:center;font-weight:600;font-size:12px;font-family:'Fraunces',serif;flex-shrink:0}
     .pf-user-info{flex:1;min-width:0}
     .pf-user-name{font-size:13px;font-weight:600;color:#1F1F1F}
     .pf-user-plan{font-size:11px;color:#6B7280}
     .pf-user-chevron{font-size:12px;color:#9CA3AF;transition:.2s}
     .pf-side-bottom.open .pf-user-chevron{transform:rotate(180deg)}
-    .pf-user-menu{position:absolute;bottom:100%;left:12px;right:12px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);overflow:hidden;display:none;z-index:100;margin-bottom:8px}
+    .pf-user-menu{position:absolute;bottom:100%;left:12px;right:12px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.12);overflow:hidden;display:none;z-index:100;margin-bottom:8px}
     .pf-user-menu.open{display:block}
-    .pf-menu-item{padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1F1F1F;cursor:pointer;transition:.15s}
+    .pf-menu-item{padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1F1F1F;cursor:pointer}
     .pf-menu-item:hover{background:#F6F3EE}
     .pf-menu-item .ico{width:20px;display:grid;place-items:center;color:#6B7280}
     .pf-menu-divider{height:1px;background:rgba(0,0,0,.06);margin:0}
@@ -70,14 +68,8 @@
     .pf-heading{font-family:'Fraunces',serif;font-size:48px;font-weight:700;line-height:1.05;letter-spacing:-.02em;text-align:center;max-width:640px;color:#1F1F1F;margin-top:8px}
     .pf-heading em{font-style:italic;font-weight:600;color:#8B1E1E}
     .pf-sub{margin-top:16px;font-size:15px;color:#6B7280;text-align:center;max-width:520px;line-height:1.6}
-    .pf-search-wrap{width:100%;max-width:680px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:100px;padding:6px 6px 6px 20px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,.06);transition:.25s;position:relative;z-index:1}
-    .pf-search-wrap:focus-within{border-color:#8B1E1E;box-shadow:0 0 0 4px rgba(139,30,30,.1),0 8px 32px rgba(0,0,0,.06)}
-    .pf-icon-btn{width:36px;height:36px;border-radius:50%;background:#F6F3EE;border:1px solid rgba(0,0,0,.06);display:grid;place-items:center;cursor:pointer;color:#6B7280;flex-shrink:0}
-    .pf-input{flex:1;border:none;outline:none;font-size:14px;color:#1F1F1F;background:transparent;min-width:0}
-    .pf-send{background:#8B1E1E;width:44px;height:44px;border-radius:50%;border:none;color:#FFFEFB;display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 4px 12px rgba(139,30,30,.25)}
     .pf-chips-grid{margin-top:28px;width:100%;max-width:680px;display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;z-index:1}
-    .pf-chip-card{border-radius:16px;padding:16px 18px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid rgba(0,0,0,.06);text-align:left;line-height:1.4;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:.25s}
-    .pf-chip-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+    .pf-chip-card{border-radius:16px;padding:16px 18px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid rgba(0,0,0,.06);text-align:left;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.04)}
     .pf-chat-area{width:100%;max-width:760px;margin-top:24px;display:flex;flex-direction:column;gap:16px;padding-bottom:24px;display:none;position:relative;z-index:1}
     .pf-msg{padding:12px 16px;border-radius:20px;font-size:14px;line-height:1.6;max-width:82%;white-space:pre-wrap;word-wrap:break-word}
     .pf-msg.user{background:#1F1F1F;color:#FFFEFB;align-self:flex-end;border-bottom-right-radius:6px;margin-left:auto}
@@ -86,17 +78,21 @@
     .pf-dot{width:6px;height:6px;background:#8B1E1E;border-radius:50%;animation:pf-b 1.2s infinite}
     .pf-dot:nth-child(2){animation-delay:.15s}.pf-dot:nth-child(3){animation-delay:.3s}
     @keyframes pf-b{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-5px);opacity:1}}
-    /* FIXED SEARCH BAR ALIGNMENT - CENTERED */
-    .pf-bottom-bar{padding:16px 20px;background:rgba(255,254,251,.96);backdrop-filter:blur(14px);border-top:1px solid rgba(0,0,0,.07);display:flex;justify-content:center;align-items:center;flex-shrink:0;position:relative;z-index:2;width:100%}
+    /* FIXED ALIGNMENT - CENTERED PERFECTLY */
+    .pf-bottom-bar{height:80px;padding:0 20px;background:rgba(255,254,251,.98);backdrop-filter:blur(14px);border-top:1px solid rgba(0,0,0,.07);display:flex;justify-content:center;align-items:center;flex-shrink:0;position:relative;z-index:2;width:100%}
     .pf-bottom-inner{width:100%;max-width:760px;display:flex;justify-content:center;align-items:center;margin:0 auto}
-    .pf-bottom-inner .pf-search-wrap{width:100%;max-width:680px;margin:0 auto}
-    .pf-wa{position:fixed;right:20px;bottom:96px;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;border:none;display:grid;place-items:center;box-shadow:0 8px 24px rgba(37,211,102,.35);cursor:pointer;z-index:5;transition:.2s}
-    .pf-wa:hover{transform:scale(1.06)}
+    .pf-search-wrap{width:100%;max-width:680px;height:52px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:100px;padding:0 6px 0 12px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.06);transition:.2s;margin:0 auto}
+    .pf-search-wrap:focus-within{border-color:#8B1E1E;box-shadow:0 0 0 4px rgba(139,30,30,.1),0 4px 20px rgba(0,0,0,.06)}
+    .pf-icon-btn{width:36px;height:36px;border-radius:50%;background:#F6F3EE;border:1px solid rgba(0,0,0,.06);display:grid;place-items:center;cursor:pointer;color:#6B7280;flex-shrink:0;font-size:14px}
+    .pf-input{flex:1;border:none;outline:none;font-size:14px;color:#1F1F1F;background:transparent;min-width:0;height:100%;line-height:52px;padding:0 4px}
+    .pf-input::placeholder{color:#9CA3AF;line-height:52px}
+    .pf-send{background:#8B1E1E;width:40px;height:40px;border-radius:50%;border:none;color:#FFFEFB;display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(139,30,30,.25);font-size:14px}
+    .pf-wa{position:fixed;right:20px;bottom:96px;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;border:none;display:grid;place-items:center;box-shadow:0 8px 24px rgba(37,211,102,.35);cursor:pointer;z-index:5}
     .pf-wa svg{width:28px;height:28px;fill:#fff}
     .pf-cta-row{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
     .pf-cta-primary{background:#8B1E1E;color:#FFFEFB;border:1px solid #8B1E1E;padding:12px 22px;border-radius:100px;font-size:13px;font-weight:600;letter-spacing:.02em;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
     .pf-cta-secondary{background:#fff;color:#1F1F1F;border:1px solid rgba(0,0,0,.12);padding:12px 22px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
-    @media(max-width:900px){.pf-sidebar{position:absolute;z-index:20;height:100%;box-shadow:8px 0 32px rgba(0,0,0,.12)}.pf-sidebar.collapsed{width:280px;transform:translateX(-100%);opacity:1}.pf-heading{font-size:34px}.pf-bottom-bar{padding:12px 12px}.pf-bottom-inner .pf-search-wrap{max-width:100%}}
+    @media(max-width:900px){.pf-sidebar{position:absolute;z-index:20;height:100%;box-shadow:8px 0 32px rgba(0,0,0,.12)}.pf-sidebar.collapsed{width:280px;transform:translateX(-100%);opacity:1}.pf-heading{font-size:34px}.pf-bottom-bar{height:72px;padding:0 12px}.pf-search-wrap{height:48px}.pf-input{line-height:48px}.pf-input::placeholder{line-height:48px}}
   `;
   document.head.appendChild(css);
 
@@ -174,10 +170,10 @@
   var sidebar=document.getElementById('pfSidebar');
   var openBtn=document.getElementById('pfOpenSidebar');
   var closeBtn=document.getElementById('pfCloseSidebar');
-  function setSidebar(open){ if(open){ sidebar.classList.remove('collapsed'); openBtn.classList.add('hidden'); localStorage.setItem('parv_sidebar_v8','open'); } else { sidebar.classList.add('collapsed'); openBtn.classList.remove('hidden'); localStorage.setItem('parv_sidebar_v8','closed'); } }
+  function setSidebar(open){ if(open){ sidebar.classList.remove('collapsed'); openBtn.classList.add('hidden'); localStorage.setItem('parv_sidebar_v10','open'); } else { sidebar.classList.add('collapsed'); openBtn.classList.remove('hidden'); localStorage.setItem('parv_sidebar_v10','closed'); } }
   closeBtn.onclick=function(){ setSidebar(false); };
   openBtn.onclick=function(){ setSidebar(true); };
-  if(localStorage.getItem('parv_sidebar_v8')==='closed') setSidebar(false);
+  if(localStorage.getItem('parv_sidebar_v10')==='closed') setSidebar(false);
 
   var input=document.getElementById('pfInput');
   var sendBtn=document.getElementById('pfSendBtn');
@@ -188,9 +184,7 @@
 
   function renderRecents(){
     recentList.innerHTML='';
-    if(recents.length===0){
-      var empty=document.createElement('div'); empty.style.cssText='padding:12px 16px;color:#9CA3AF;font-size:12px;text-align:center'; empty.textContent='No recent searches'; recentList.appendChild(empty); return;
-    }
+    if(recents.length===0){ var empty=document.createElement('div'); empty.style.cssText='padding:12px 16px;color:#9CA3AF;font-size:12px;text-align:center'; empty.textContent='No recent searches'; recentList.appendChild(empty); return; }
     recents.forEach(function(item, idx){
       var div=document.createElement('div');
       div.className='pf-recent-item'+(idx===0?' active':'')+(item.archived?' archived':'');
@@ -204,12 +198,7 @@
   function newSearch(){ hero.style.display='flex'; chatArea.style.display='none'; chatArea.innerHTML=''; input.value=''; input.focus(); document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')}); SESSION_ID='parv_desktop_'+Date.now(); localStorage.setItem(SID_KEY, SESSION_ID); }
   document.getElementById('pfNewBtn').onclick=newSearch;
   document.getElementById('pfCloseRoot').onclick=function(){ root.remove(); css.remove(); };
-  
-  // FIXED: Clear without popup, instantly clear
-  document.getElementById('pfClearBtn').onclick=function(){
-    recents=[]; saveRecents(recents); renderRecents();
-  };
-
+  document.getElementById('pfClearBtn').onclick=function(){ recents=[]; saveRecents(recents); renderRecents(); };
   recentList.onclick=function(e){
     var del=e.target.closest('.pf-action-btn.del');
     var arch=e.target.closest('.pf-action-btn.archive');
@@ -218,7 +207,7 @@
     var idx=parseInt(item.dataset.idx);
     if(del){ e.stopPropagation(); recents.splice(idx,1); saveRecents(recents); renderRecents(); return; }
     if(arch){ e.stopPropagation(); recents[idx].archived=!recents[idx].archived; saveRecents(recents); renderRecents(); return; }
-    document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')}); item.classList.add('active'); doSearch(item.dataset.q);
+    if(e.target.closest('.pf-recent-main')){ document.querySelectorAll('.pf-recent-item').forEach(function(i){i.classList.remove('active')}); item.classList.add('active'); doSearch(item.dataset.q); }
   };
 
   var userBtn=document.getElementById('pfUserBtn');
@@ -236,8 +225,6 @@
   };
 
   document.getElementById('pfWaBtn').onclick=function(){ window.open('https://wa.me/919896342940?text=Hi%20Parv%20Industries%20I%20want%20to%20inquire%20about%20bulk%20order','_blank'); };
-
-  // FIXED: Explore and Bulk Quote - NO external links, just trigger chat (normal)
   document.getElementById('pfExploreBtn').onclick=function(){ doSearch('Spices List'); };
   document.getElementById('pfBulkBtn').onclick=function(){ doSearch('Bulk Quote'); };
   document.getElementById('pfChipsGrid').onclick=function(e){ var b=e.target.closest('button'); if(!b) return; doSearch(b.dataset.q); };
@@ -256,7 +243,7 @@
       try{ var d=JSON.parse(reply); if(Array.isArray(d) && d[0]){ reply = d[0].output || d[0].text || d[0].message || d[0].response || reply; } else { reply = d.output || d.text || d.message || d.response || d.reply || reply; } }catch(e){}
       if(!reply || reply.trim()==='' || reply==='{}' || reply==='[]'){ reply='Thanks for reaching out! Our team will get back to you shortly.'; }
       typing.remove();
-      var bot=document.createElement('div'); bot.className='pf-msg bot'; bot.innerHTML=reply.replace(/\\n/g,'<br>').replace(/\\n/g,'<br>'); chatArea.appendChild(bot);
+      var bot=document.createElement('div'); bot.className='pf-msg bot'; bot.innerHTML=reply.replace(/\\n/g,'<br>'); chatArea.appendChild(bot);
       recents.unshift({title:text.slice(0,22), sub:reply.slice(0,38).replace(/<[^>]*>/g,'')+'...', q:text, archived:false});
       if(recents.length>20) recents=recents.slice(0,20);
       saveRecents(recents); renderRecents();
